@@ -122,7 +122,7 @@ def main():
             config.LEARNING_RATE,
         )
     '''
-    gen.select_subgraph('3_64_64')
+    gen.select_subgraph('3_64_64', 2)
     print(gen)
 
     input_tensor = torch.rand(3, 3, 28, 28)
@@ -141,8 +141,9 @@ def main():
     for epoch in range(config.NUM_EPOCHS):
 
         chosen = random.sample(possible_subgraphs, 1)[0]
-        print("Chose subgraph", chosen)
-        gen.select_subgraph(chosen)
+        upsampler = random.randint(0, 3)
+        print("Chose subgraph", chosen, upsampler)
+        gen.select_subgraph(chosen, upsampler)
         tb_step = train_fn(
             loader,
             disc,
