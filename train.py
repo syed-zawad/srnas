@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 from model import Generator, Discriminator, initialize_weights
 from tqdm import tqdm
 from dataset import MyImageFolder
+
 from torch.utils.tensorboard import SummaryWriter
 
 torch.backends.cudnn.benchmark = True
