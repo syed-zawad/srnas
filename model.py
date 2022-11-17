@@ -1,6 +1,7 @@
 import torch
 from torch import nn
-
+import ms_blocks.PropBlocks as SharedBlocks
+import gen_ms_blocks as Upsamplers
 
 class ConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, use_act, **kwargs):
@@ -82,7 +83,7 @@ class Generator(nn.Module):
             search_space['kernel_sizes'], 
             num_blocks=num_blocks
         )
-        self.residuals = self.sub_graphs['3_8_32']
+        #self.residuals = self.sub_graphs['3_8_32']
         self.conv = nn.Conv2d(num_channels, num_channels, kernel_size=3, stride=1, padding=1)
         self.upsamples = nn.Sequential(
             UpsampleBlock(num_channels), UpsampleBlock(num_channels),
@@ -93,38 +94,48 @@ class Generator(nn.Module):
             nn.Conv2d(num_channels, in_channels, 3, 1, 1, bias=True),
         )
 
-    def gen_subgraphs(self, in_channels, out_channels, kernel_sizes, num_blocks):
+    def gen_subgraphs(self, in_channels, out_channels, kernel_sizes):
 
         self.sub_graphs = {}
-        for kernel_size in kernel_sizes:
-            for in_channel in in_channels:
-                for out_channel in out_channels:
-                    comb = '{}_{}_{}'.format(kernel_size, in_channel, out_channel)
-                    input_conv = RRDB(
-                        in_channels=32, 
-                        out_channels=out_channel, 
-                        kernel_size=kernel_size
-                    )
-                    mid_graph = [RRDB(
-                        in_channels=32, 
-                        out_channels=out_channel, 
-                        kernel_size=kernel_size
-                    )] #for _ in range(num_blocks-2)]
-                    output_conv = RRDB(
-                        in_channels=32, 
-                        out_channels=out_channel, 
-                        kernel_size=kernel_size
-                    )
-                    sub_graph = [input_conv] + mid_graph + [output_conv]
-                    sub_graph = nn.Sequential(*sub_graph)
-                    self.sub_graphs[comb] = sub_graph
+        for block in SharedBlocks:
+            for kernel_size in kernel_sizes:
+                for in_channel in in_channels:
+                    for out_channel in out_channels:
+                        comb = '{}_{}_{}'.format(kernel_size, in_channel, out_channel)
+                        '''
+                        input_conv = block.input(32, out_channel, kernel_size)
+                        _in_channels = blocks.match(32, in_channel, out_channel)
+                        middle = []
+                        for i in range(50, 16, -1):
+                            middle.append(block.input(_in_channels[i], out_channel, kernel_size)
+                        output_conv = block.output(_in_channels[-1], out_channel, kernel_size)
+                        '''
+                        input_conv = RRDB(
+                            in_channels=32, 
+                            out_channels=out_channel, 
+                            kernel_size=kernel_size
+                        )
+                        middle = [RRDB(
+                            in_channels=32, 
+                            out_channels=out_channel, 
+                            kernel_size=kernel_size
+                        )] * 15
+                        output_conv = RRDB(
+                            in_channels=32, 
+                            out_channels=out_channel, 
+                            kernel_size=kernel_size
+                        )
+                        sub_graph = [input_conv] + mid_graph + [output_conv]
+                        sub_graph = nn.Sequential(*sub_graph)
+                        self.sub_graphs[comb] = sub_graph
 
 
     def get_subgraphs_descr(self):
         return list(self.sub_graphs.keys())
 
-    def select_subgraph(self, comb):
+    def select_subgraph(self, comb, upsampler):
         self.residuals = self.sub_graphs[comb]
+        self.upsamples = Upsamplers[upsampler]
 
     def forward(self, x):
         initial = self.initial(x)
