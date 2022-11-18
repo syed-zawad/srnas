@@ -16,6 +16,7 @@ To Do -
     a) Currently contains many other open-source additions, fix it and properly link/cite them
     b) Removed ONNX build, use open source version now.
  3. Replace #### shell scripts.
-    a) Once everything is working, replace these with generic bash scripts for easy runs
-    b) Make sure no identifiable code or comments
-    c) How to replace #####? Find a way without increasing deployment/profiling costs.
+    a) Once everything is working, replace with generic bash scripts for easy runs
+    b) Add back algorithm with generic Linux commands (removed)
+    c) Make sure no identifiable code or comments
+    d) How to replace #####? Find a way without increasing profiling costs.
