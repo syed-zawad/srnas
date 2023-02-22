@@ -1,6 +1,6 @@
 # Code for DySR.
 
-# Work in progress, not yet suitable for third-parties/public
+# Work in progress, not yet suitable for third-parties to run. Please check back again after March 31st 2023.
 
 **Removed all proprietary and indentifiable code. Nothing is linked together in current version**
 
